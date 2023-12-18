@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
+#include <netdb.h>
 
 #define MAX_DATA_SIZE 512
 #define SERVER_PORT 69
@@ -23,6 +24,10 @@ void gettftp(char *host, char *file){
 int main(int argc, char *argv[]){
 
 	char *host, *file;
+	struct addrinfo hints;
+	struct addrinfo *result;
+	int s;
+
 
         if (argc != 3) {
                 command("Error, you need 3 arguments\n",STDOUT_FILENO);}
@@ -32,9 +37,25 @@ int main(int argc, char *argv[]){
                 host = argv[1];
                 file = argv[2];
 
+	}
 
-        gettftp(host,file);
-}
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_flags = AI_PASSIVE;
+	hints.ai_protocol = 0;
+
+	s = getaddrinfo(argv[1],"69", &hints, &result);
+	if (s != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+		exit(EXIT_FAILURE);
+	}
+
+        host=host;
+	file=file;
+
+	gettftp(host,file);
+
 	return EXIT_SUCCESS;
 
 }
