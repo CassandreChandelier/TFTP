@@ -36,14 +36,14 @@ void gettftp(char *host, char *file){
     for (p = result; p != NULL; p = p->ai_next) {
         client_socket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (client_socket == -1) {
-            continue; // Échec de création du socket, essayer l'adresse suivante
+            continue; // Fail for the creation of the socket
         }
 
         if (connect(client_socket, p->ai_addr, p->ai_addrlen) != -1) {
-            break; // Connexion réussie
+            break; // success for the connection
         }
 
-        close(client_socket); // Fermer le socket en cas d'échec de la connexion
+        close(client_socket); // close the socket if fail of connection
     }
 
 	freeaddrinfo(result);
