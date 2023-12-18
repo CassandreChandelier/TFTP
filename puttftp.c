@@ -8,55 +8,74 @@
 #include <sys/wait.h>
 #include <netdb.h>
 
-#define MAX_DATA_SIZE 512
-#define SERVER_PORT 69
-#define NBYTES 1024
-
+#define MAX_DATA_SIZE 1024
+#define SOCKET_ERROR "Error while creating the socket"
 
 void command(char *output,int exit){
-        write(exit, output, strlen(output));
+	write(exit, output, strlen(output));
 }
 
 void puttftp(char *host, char *file){
-                command("Uploading file from the server \n",STDOUT_FILENO);
+	command("Upoading file on the server\r\n",STDOUT_FILENO);
+
+
+
+	struct addrinfo hints,*result,*p;
+	int status,sock;
+
+	memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_flags = AI_PASSIVE;
+    hints.ai_protocol = IPPROTO_UDP;
+
+	status = getaddrinfo(host,"69", &hints, &result);
+    if (status != 0) {
+        fprintf(stderr, "Error getaddrinfo: %s\r\n", gai_strerror(status));
+		exit(EXIT_FAILURE);}
+
+	int client_socket = -1;
+    for (p = result; p != NULL; p = p->ai_next) {
+        client_socket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (client_socket == -1) {
+            continue; // Échec de création du socket, essayer l'adresse suivante
+        }
+
+        if (connect(client_socket, p->ai_addr, p->ai_addrlen) != -1) {
+            break; // Connexion réussie
+        }
+
+        close(client_socket); // Fermer le socket en cas d'échec de la connexion
+    }
+
+	freeaddrinfo(result);
+
+	if (p == NULL){
+		fprintf(stderr,"Can't connect to the server\n");
+		exit(EXIT_FAILURE);
+		}
+
 }
+
 
 int main(int argc, char *argv[]){
 
-        char *host, *file;
-        struct addrinfo hints;
-        struct addrinfo *result;
-        int s;
+	char *host, *file;
+
+	if (argc != 3) {
+        command("Error, you need 3 arguments\r\n",STDOUT_FILENO);
+		exit(EXIT_FAILURE);}
 
 
-        if (argc != 3) {
-                command("Error, you need 3 arguments\n",STDOUT_FILENO);}
+    else {
+        host = argv[1];
+        file = argv[2];
 
+    }
 
-        else {
-                host = argv[1];
-                file = argv[2];
+   puttftp(host,file);
 
-	}
+   return 0;
 
-	memset(&hints, 0, sizeof(struct addrinfo));
-        hints.ai_family = AF_INET; //IPv4
-        hints.ai_socktype = SOCK_DGRAM;
-        hints.ai_flags = AI_PASSIVE;
-        hints.ai_protocol = 0;
-
-        s = getaddrinfo(argv[1],"69", &hints, &result);
-        if (s != 0) {
-                fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
-                exit(EXIT_FAILURE);
-        }
-
-        host=host;
-        file=file;
-
-        puttftp(host,file);
-
-        return EXIT_SUCCESS;
 
 }
-
