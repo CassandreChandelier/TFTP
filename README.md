@@ -31,5 +31,10 @@ Then we create a socket and connect to the server unsing the obtained address in
 If it is a success, we can establish a connection to the server and it close the socket when the communication is complete.
 
 
+## Question 4
+
+In this question, we add a read request (RRQ) and send it to the server.
+We didn't have enough time to do the next parts.
+
 
 
