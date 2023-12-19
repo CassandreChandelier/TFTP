@@ -39,14 +39,18 @@ void gettftp(char *host, char *file){
             continue; // Fail for the creation of the socket
         }
 
-        if (connect(client_socket, p->ai_addr, p->ai_addrlen) != -1) {
-            break; // success for the connection
-        }
+        char rrq_packet[MAX_DATA_SIZE];
+        sprintf(rrq_packet, "\x00\x01%s\x00octet\x00", file);
 
-        close(client_socket); // close the socket if fail of connection
-    }
+        sendto(client_socket, rrq_packet, strlen(rrq_packet), 0, rp->ai_addr, rp->ai_>
 
-	freeaddrinfo(result);
+        break; // success connexion
+
+   }
+
+        freeaddrinfo(result);
+        close(client_socket);
+
 
 	if (p == NULL){
 		fprintf(stderr,"Can't connect to the server\n");
